@@ -9,7 +9,7 @@
 # Ignore everything in the "wp-content" directory, except the "plugins"
 # and "themes" directories.
 # and "mu-plugins"
-wp-content/*	
+wp-content/*
 !wp-content/plugins/
 !wp-content/mu-plugins/
 !wp-content/themes/
@@ -18,7 +18,10 @@ wp-content/*
 wp-content/plugins/*
 !wp-content/plugins/rest-api
 !wp-content/plugins/rest-api-console
+!wp-content/plugins/advanced-custom-fields-pro
 
 # Ignore everything in the "themes" directory, except the Helsingborg theme
 wp-content/themes/*
 !wp-content/themes/This-is-Helsingborg/
+
+.DS_Store
