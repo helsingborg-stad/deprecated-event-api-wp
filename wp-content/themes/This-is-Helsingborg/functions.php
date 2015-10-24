@@ -7,13 +7,13 @@
      * THEME SETTINGS
      */
     $lazyloadImages = false;
-    
+
     /**
-    * MISC SETTINGS 
+    * MISC SETTINGS
     */
-    
-    //Hidden ACF by default 
-    if(!defined("ACF_LITE")){ define("ACF_LITE", true); }
+
+    //Hidden ACF by default
+    //if(!defined("ACF_LITE")){ define("ACF_LITE", true); }
 
     /**
      * THEME SETUP
