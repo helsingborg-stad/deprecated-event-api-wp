@@ -10,12 +10,12 @@
 	Text Domain: hbg-event-manager
 	*/
 	
-	$import_folders = array("include", "class", "controller");
+	//Block external access
+	if(!defined("ABSPATH")) {die("nope");}
 	
-	if(!empty( $import_folders) && is_array( $import_folders ) ) {
-		foreach( $import_folders as $folder ) {
-			foreach (glob("*.php") as $filename) {
-				include './lib/'.$folder."/".$filename; 
-			}
-		}
-	}
+	//Import configuration 
+
+	//Import includes 
+	
+	//Import class
+	require plugin_dir_path( __FILE__ ).'lib/class/event-manager.php'; 
