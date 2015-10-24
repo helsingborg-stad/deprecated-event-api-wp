@@ -21,6 +21,7 @@ wp-content/plugins/*
 !wp-content/plugins/rest-api
 !wp-content/plugins/rest-api-console
 !wp-content/plugins/advanced-custom-fields-pro
+!wp-content/plugins/hbg-event-manager
 
 # Ignore everything in the "themes" directory, except the Helsingborg theme
 wp-content/themes/*
