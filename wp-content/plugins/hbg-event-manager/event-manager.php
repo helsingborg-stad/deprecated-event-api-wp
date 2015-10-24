@@ -15,7 +15,5 @@
 	
 	//Import configuration 
 
-	//Import includes 
-	
 	//Import class
 	require plugin_dir_path( __FILE__ ).'lib/class/event-manager.php'; 
