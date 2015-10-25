@@ -27,19 +27,25 @@ if ( ! defined( 'EVENT_MANAGER_DISABLE_CORE' ) ) {
 	define( 'EVENT_MANAGER_DISABLE_CORE', true );
 }
 
-Class HbgEventManager {
+/**
+ * Event Manager class
+ */
+class HbgEventManager {
 
+	/**
+	 * Constructor, set up all actions and filters
+	 */
 	public function __construct() {
 		//cpt
-		add_action('init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_event');
-		add_action('init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_location');
-		add_action('init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_organisation');
+		add_action( 'init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_event' );
+		add_action( 'init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_location' );
+		add_action( 'init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_organisation' );
 
 		//options
-		add_action('init', '\Helsingborg\EventManager\HbgEventManager::register_options_page');
+		add_action( 'init', '\Helsingborg\EventManager\HbgEventManager::register_options_page' );
 
 		//Unregister core
-		add_action('admin_menu', '\Helsingborg\EventManager\HbgEventManager::unregister_core_post_types');
+		add_action( 'admin_menu', '\Helsingborg\EventManager\HbgEventManager::unregister_core_post_types' );
 
 		//add_filter('rest_prepare_post',  '\Helsingborg\EventManager\HbgEventManager::json_api_encode_acf', 10, 3);
 		add_action( 'rest_api_init', '\Helsingborg\EventManager\HbgEventManager::slug_register_acf' );
@@ -83,14 +89,14 @@ Class HbgEventManager {
 			'hierarchical'       => false,
 			'menu_position'      => 11,
 			'show_in_rest'       => true,
-			'supports'           => array( 'title', 'editor' )
+			'supports'           => array( 'title', 'editor' ),
 		);
 
 		register_post_type( 'event', $args );
 
 	}
 
-	public static function register_cpt_location () {
+	/*	public static function register_cpt_location () {
 
 		$labels = array(
 			'name'               => _x( 'Location', 'post type general name', 'hbg-event-manager' ),
@@ -167,90 +173,98 @@ Class HbgEventManager {
 		register_post_type( 'organisation', $args );
 
 	}
+	*/
 
+	/**
+	 * ACF options page
+	 * @return void
+	 */
 	public static function register_options_page () {
 
-		if( function_exists('acf_add_options_page') ) {
+		if ( function_exists( 'acf_add_options_page' ) ) {
 
 			acf_add_options_page(array(
-				'page_title' 	=> __("API Options",'hbg-event-manager'),
-				'menu_title'	=> __("API Options",'hbg-event-manager'),
-				'menu_slug' 	=> __("api-options",'hbg-event-manager-slug'),
-				'capability'	=> 'administrator',
-				'redirect'		=> false
+				'page_title' => __( 'API Options', 'hbg-event-manager' ),
+				'menu_title' => __( 'API Options', 'hbg-event-manager' ),
+				'menu_slug'  => __( 'api-options', 'hbg-event-manager-slug' ),
+				'capability' => 'administrator',
+				'redirect'   => false,
 			));
 
 		}
 
 	}
 
+	/**
+	 * Send ping to search system
+	 * @param  string $to      Only "search" is recognized
+	 * @param  int    $post_id Post id
+	 * @return WP_Error|0
+	 */
 	public function make_ping( $to, $post_id ) {
 
 		//Validate id
-		if ( !is_numeric( $post_id ) || get_post_status( $post_id ) === false ) {
-			return new WP_Error( 'broke', __( "Not a valid ping to value. Post dosent exists.", 'hbg-event-manager' ) );
+		if ( ! is_numeric( $post_id ) || get_post_status( $post_id ) === false ) {
+			return new WP_Error( 'broke', __( 'Not a valid ping to value. Post dosent exists.', 'hbg-event-manager' ) );
 		}
 
 		//Ping urls
-		switch ($to) {
-			case "search":
-				$ping_url = get_option("event_manager_search_ping_url", "");
+		switch ( $to ) {
+			case 'search' :
+				$ping_url = get_option( 'event_manager_search_ping_url', '' );
 				break;
 			default:
-				return new WP_Error( 'broke', __( "Not a valid ping to value.", 'hbg-event-manager' ) );
+				return new WP_Error( 'broke', __( 'Not a valid ping to value.', 'hbg-event-manager' ) );
 		}
 
 		//Validate url
-		if (!filter_var($ping_url, FILTER_VALIDATE_URL) === false) {
+		if ( ! filter_var( $ping_url, FILTER_VALIDATE_URL ) === false ) {
 
-			if ( !empty( parse_url($ping_url)['query'] ) ) {
-				$delimiter = "?";
+			if ( ! empty( parse_url( $ping_url )['query'] ) ) {
+				$delimiter = '?';
 			} else {
-				$delimiter = "&";
+				$delimiter = '&';
 			}
 
 			wp_remove_head($ping_url.$delimiter.$post_id, array(
-				'timeout' 		=> 2,
-				'user-agent'	=> 'wp-event-manager/1.0'
+				'timeout'    => 2,
+				'user-agent' => 'wp-event-manager/1.0',
 			));
 
-
 		} else {
-			return new WP_Error( 'broke', __( "Not a valid ping url.", 'hbg-event-manager' ) );
+			return new WP_Error( 'broke', __( 'Not a valid ping url.', 'hbg-event-manager' ) );
 		}
 
 	}
 
 
-	//Unregister core post types
+	/**
+	 * Unregister core post types
+	 * @return void
+	 */
 	public static function unregister_core_post_types () {
 
 		if ( EVENT_MANAGER_DISABLE_CORE == true ) {
 
 			global $wp_post_types;
 
-			$core_post_types = array("post", "page");
+			$core_post_types = array( 'post', 'page' );
 
-			if ( is_array( $core_post_types ) && !empty( $core_post_types ) ) {
+			if ( is_array( $core_post_types ) && ! empty( $core_post_types ) ) {
 
 				foreach ( $core_post_types as $core_post_type ) {
 					if ( isset( $wp_post_types[ $core_post_type ] ) ) {
-					   remove_menu_page( 'edit.php?post_type='. $core_post_type );
+						remove_menu_page( 'edit.php?post_type='. $core_post_type );
 					}
 				}
-
 			}
-
 		}
-
 	}
 
-	public function json_api_encode_acf( $response, $post, $request ) {
-		$response->data['acf'] = get_fields($post['ID']);
-
-		return $response;
-	}
-
+	/**
+	 * Register new API field acf
+	 * @return void
+	 */
 	public static function slug_register_acf() {
 		register_api_field( 'event',
 			'acf',
@@ -261,12 +275,32 @@ Class HbgEventManager {
 			)
 		);
 	}
+
+	/**
+	 * Callback for getting acf field
+	 * @param  [type] $object     [description]
+	 * @param  [type] $field_name [description]
+	 * @param  [type] $request    [description]
+	 * @return [type]             [description]
+	 */
 	public static function slug_get_acf( $object, $field_name, $request ) {
 		return get_fields( $object['id'] );
 	}
+
+	/**
+	 * Callback for updating acf field
+	 * @param  [type] $value      [description]
+	 * @param  [type] $object     [description]
+	 * @param  [type] $field_name [description]
+	 * @return [type]             [description]
+	 */
 	public static function slug_update_acf( $value, $object, $field_name ) {
 		return update_fields( $value, $object->ID );
 	}
+
+	/**
+	 * Destruct, destroy, conquer!
+	 */
 	public function __destruct() {
 
 	}
