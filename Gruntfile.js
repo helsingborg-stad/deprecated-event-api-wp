@@ -7,7 +7,7 @@ module.exports = function(grunt) {
 		rsync: {
 			options: {
 				args: ["--verbose"],
-				exclude: ['package.json','Gruntfile.js','composer.json', 'wordpress-rules.xml', '.git*', 'node_modules', '.sass-cache', 'Gruntfile.js', 'package.json', '.DS_Store', 'README.md', 'config.rb', '.jshintrc'],
+				exclude: ['wp-config.php', 'package.json','Gruntfile.js','composer.json', 'wordpress-rules.xml', '.git*', 'node_modules', '.sass-cache', 'Gruntfile.js', 'package.json', '.DS_Store', 'README.md', 'config.rb', '.jshintrc'],
 				recursive: true
 			},
 			stage: {
