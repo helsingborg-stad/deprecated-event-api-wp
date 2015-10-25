@@ -6,13 +6,26 @@
 	//Block external access
 	if(!defined("ABSPATH")) {die("nope");}
 
+	//Disable core by default
+	if (!defined('EVENT_MANAGER_DISABLE_CORE')) {
+		define('EVENT_MANAGER_DISABLE_CORE', true);
+	}
 
 	Class HbgEventManager {
 
 		public function __construct() {
+
+			//cpt
 			add_action('init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_event');
 			add_action('init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_location');
 			add_action('init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_organisation');
+
+			//options
+			add_action('init', '\Helsingborg\EventManager\HbgEventManager::register_options_page');
+
+			//Unregister core
+			add_action('admin_menu', '\Helsingborg\EventManager\HbgEventManager::unregister_core_post_types');
+
 		}
 
 		public static function register_cpt_event () {
@@ -42,7 +55,7 @@
 				'show_ui'            => true,
 				'show_in_menu'       => true,
 				'query_var'          => true,
-				'rewrite'            => array( 'slug' => __("event",'hbg-event-manager') ),
+				'rewrite'            => array( 'slug' => __("event",'hbg-event-manager-slug') ),
 				'capability_type'    => 'post',
 				'has_archive'        => true,
 				'hierarchical'       => false,
@@ -81,7 +94,7 @@
 				'show_ui'            => true,
 				'show_in_menu'       => true,
 				'query_var'          => true,
-				'rewrite'            => array( 'slug' => __("location",'hbg-event-manager') ),
+				'rewrite'            => array( 'slug' => __("location",'hbg-event-manager-slug') ),
 				'capability_type'    => 'post',
 				'has_archive'        => true,
 				'hierarchical'       => false,
@@ -120,7 +133,7 @@
 				'show_ui'            => true,
 				'show_in_menu'       => true,
 				'query_var'          => true,
-				'rewrite'            => array( 'slug' => __("organisation",'hbg-event-manager') ),
+				'rewrite'            => array( 'slug' => __("organisation",'hbg-event-manager-slug') ),
 				'capability_type'    => 'post',
 				'has_archive'        => true,
 				'hierarchical'       => false,
@@ -129,6 +142,22 @@
 			);
 
 			register_post_type( 'organisation', $args );
+
+		}
+
+		public static function register_options_page () {
+
+			if( function_exists('acf_add_options_page') ) {
+
+				acf_add_options_page(array(
+					'page_title' 	=> __("API Options",'hbg-event-manager'),
+					'menu_title'	=> __("API Options",'hbg-event-manager'),
+					'menu_slug' 	=> __("api-options",'hbg-event-manager-slug'),
+					'capability'	=> 'administrator',
+					'redirect'		=> false
+				));
+
+			}
 
 		}
 
@@ -165,6 +194,30 @@
 
 			} else {
 				return new WP_Error( 'broke', __( "Not a valid ping url.", 'hbg-event-manager' ) );
+			}
+
+		}
+
+
+		//Unregister core post types
+		public static function unregister_core_post_types () {
+
+			if ( EVENT_MANAGER_DISABLE_CORE == true ) {
+
+				global $wp_post_types;
+
+				$core_post_types = array("post", "page");
+
+				if ( is_array( $core_post_types ) && !empty( $core_post_types ) ) {
+
+					foreach ( $core_post_types as $core_post_type ) {
+					    if ( isset( $wp_post_types[ $core_post_type ] ) ) {
+					       remove_menu_page( 'edit.php?post_type='. $core_post_type );
+					    }
+					}
+
+				}
+
 			}
 
 		}
