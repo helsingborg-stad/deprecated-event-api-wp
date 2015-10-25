@@ -1,22 +1,22 @@
 <?php
 
-	//Set namespace	
+	//Set namespace
 	namespace Helsingborg\EventManager;
-	
-	//Block external access 
+
+	//Block external access
 	if(!defined("ABSPATH")) {die("nope");}
-	
-	
+
+
 	Class HbgEventManager {
-		
+
 		public function __construct() {
 			add_action('init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_event');
 			add_action('init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_location');
 			add_action('init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_organisation');
 		}
-	
+
 		public static function register_cpt_event () {
-		
+
 			$labels = array(
 				'name'               => _x( 'Event', 'post type general name', 'hbg-event-manager' ),
 				'singular_name'      => _x( 'Event', 'post type singular name', 'hbg-event-manager' ),
@@ -33,7 +33,7 @@
 				'not_found'          => __( 'No event found.', 'hbg-event-manager' ),
 				'not_found_in_trash' => __( 'No event found in Trash.', 'hbg-event-manager' )
 			);
-		
+
 			$args = array(
 				'labels'             => $labels,
 		        'description'        => __( 'Custom post type for event', 'hbg-event-manager' ),
@@ -49,13 +49,13 @@
 				'menu_position'      => 11,
 				'supports'           => array( 'title', 'editor' )
 			);
-		
-			register_post_type( 'event', $args );	
-			
+
+			register_post_type( 'event', $args );
+
 		}
-		
+
 		public static function register_cpt_location () {
-		
+
 			$labels = array(
 				'name'               => _x( 'Location', 'post type general name', 'hbg-event-manager' ),
 				'singular_name'      => _x( 'Location', 'post type singular name', 'hbg-event-manager' ),
@@ -72,7 +72,7 @@
 				'not_found'          => __( 'No location found.', 'hbg-event-manager' ),
 				'not_found_in_trash' => __( 'No location found in Trash.', 'hbg-event-manager' )
 			);
-		
+
 			$args = array(
 				'labels'             => $labels,
 		        'description'        => __( 'Custom post type for event', 'hbg-event-manager' ),
@@ -88,13 +88,13 @@
 				'menu_position'      => 15,
 				'supports'           => array( 'title' )
 			);
-		
-			register_post_type( 'location', $args );	
-			
+
+			register_post_type( 'location', $args );
+
 		}
-		
+
 		public static function register_cpt_organisation () {
-		
+
 			$labels = array(
 				'name'               => _x( 'Organisation', 'post type general name', 'hbg-event-manager' ),
 				'singular_name'      => _x( 'Organisation', 'post type singular name', 'hbg-event-manager' ),
@@ -111,7 +111,7 @@
 				'not_found'          => __( 'No organisation found.', 'hbg-event-manager' ),
 				'not_found_in_trash' => __( 'No organisation found in Trash.', 'hbg-event-manager' )
 			);
-		
+
 			$args = array(
 				'labels'             => $labels,
 		        'description'        => __( 'Custom post type for event-organisations', 'hbg-event-manager' ),
@@ -127,53 +127,52 @@
 				'menu_position'      => 12,
 				'supports'           => array( 'title' )
 			);
-		
-			register_post_type( 'organisation', $args );	
-			
+
+			register_post_type( 'organisation', $args );
+
 		}
-		
+
 		public function make_ping( $to, $post_id ) {
-			
-			//Validate id 
+
+			//Validate id
 			if ( !is_numeric( $post_id ) || get_post_status( $post_id ) === false ) {
 				return new WP_Error( 'broke', __( "Not a valid ping to value. Post dosent exists.", 'hbg-event-manager' ) );
 			}
-			
-			//Ping urls 
+
+			//Ping urls
 			switch ($to) {
 			    case "search":
-			        $ping_url = get_option("event_manager_search_ping_url", ""); 
+			        $ping_url = get_option("event_manager_search_ping_url", "");
 			        break;
 			    default:
 					return new WP_Error( 'broke', __( "Not a valid ping to value.", 'hbg-event-manager' ) );
 			}
-			
-			//Validate url 
-			if (!filter_var($ping_url, FILTER_VALIDATE_URL) === false) { 
-				
+
+			//Validate url
+			if (!filter_var($ping_url, FILTER_VALIDATE_URL) === false) {
+
 				if ( !empty( parse_url($ping_url)['query'] ) ) {
-					$delimiter = "?"; 
+					$delimiter = "?";
 				} else {
-					$delimiter = "&"; 
+					$delimiter = "&";
 				}
-				
+
 				wp_remove_head($ping_url.$delimiter.$post_id, array(
-					'timeout' 		=> 2, 
+					'timeout' 		=> 2,
 					'user-agent'	=> 'wp-event-manager/1.0'
-				)); 
-				
-				
+				));
+
+
 			} else {
 				return new WP_Error( 'broke', __( "Not a valid ping url.", 'hbg-event-manager' ) );
-			} 
-			
+			}
+
 		}
-		
+
 		public function __destruct() {
-			
+
 		}
-		
+
 	}
-	
-	new HbgEventManager; 
-	
+
+	new HbgEventManager;
