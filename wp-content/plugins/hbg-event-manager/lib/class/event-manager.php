@@ -8,15 +8,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'nope' );
 }
 
+
+
+if ( ! function_exists( '_log' ) ) {
+	/**
+	 * Debug log
+	 */
+	function _log() {
+		if ( WP_DEBUG === true ) {
+			$args = func_get_args();
+			error_log( print_r( $args, true ) );
+		}
+	}
+}
+
 //Disable core by default
-if (!defined('EVENT_MANAGER_DISABLE_CORE')) {
-	define('EVENT_MANAGER_DISABLE_CORE', true);
+if ( ! defined( 'EVENT_MANAGER_DISABLE_CORE' ) ) {
+	define( 'EVENT_MANAGER_DISABLE_CORE', true );
 }
 
 Class HbgEventManager {
 
 	public function __construct() {
-
 		//cpt
 		add_action('init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_event');
 		add_action('init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_location');
@@ -28,8 +41,15 @@ Class HbgEventManager {
 		//Unregister core
 		add_action('admin_menu', '\Helsingborg\EventManager\HbgEventManager::unregister_core_post_types');
 
+		//add_filter('rest_prepare_post',  '\Helsingborg\EventManager\HbgEventManager::json_api_encode_acf', 10, 3);
+		add_action( 'rest_api_init', '\Helsingborg\EventManager\HbgEventManager::slug_register_acf' );
+
 	}
 
+	/**
+	 * Register the event post type
+	 * @return void
+	 */
 	public static function register_cpt_event () {
 
 		$labels = array(
@@ -46,18 +66,18 @@ Class HbgEventManager {
 			'search_items'       => __( 'Search Events', 'hbg-event-manager' ),
 			'parent_item_colon'  => __( 'Parent Events:', 'hbg-event-manager' ),
 			'not_found'          => __( 'No event found.', 'hbg-event-manager' ),
-			'not_found_in_trash' => __( 'No event found in Trash.', 'hbg-event-manager' )
+			'not_found_in_trash' => __( 'No event found in Trash.', 'hbg-event-manager' ),
 		);
 
 		$args = array(
 			'labels'             => $labels,
-	        'description'        => __( 'Custom post type for event', 'hbg-event-manager' ),
+			'description'        => __( 'Custom post type for event', 'hbg-event-manager' ),
 			'public'             => true,
 			'publicly_queryable' => true,
 			'show_ui'            => true,
 			'show_in_menu'       => true,
 			'query_var'          => true,
-			'rewrite'            => array( 'slug' => __("event",'hbg-event-manager-slug') ),
+			'rewrite'            => array( 'slug' => __( 'event', 'hbg-event-manager-slug' ) ),
 			'capability_type'    => 'post',
 			'has_archive'        => true,
 			'hierarchical'       => false,
@@ -91,7 +111,7 @@ Class HbgEventManager {
 
 		$args = array(
 			'labels'             => $labels,
-	        'description'        => __( 'Custom post type for event', 'hbg-event-manager' ),
+			'description'        => __( 'Custom post type for event', 'hbg-event-manager' ),
 			'public'             => true,
 			'publicly_queryable' => true,
 			'show_ui'            => true,
@@ -130,7 +150,7 @@ Class HbgEventManager {
 
 		$args = array(
 			'labels'             => $labels,
-	        'description'        => __( 'Custom post type for event-organisations', 'hbg-event-manager' ),
+			'description'        => __( 'Custom post type for event-organisations', 'hbg-event-manager' ),
 			'public'             => true,
 			'publicly_queryable' => true,
 			'show_ui'            => true,
@@ -173,10 +193,10 @@ Class HbgEventManager {
 
 		//Ping urls
 		switch ($to) {
-		    case "search":
-		        $ping_url = get_option("event_manager_search_ping_url", "");
-		        break;
-		    default:
+			case "search":
+				$ping_url = get_option("event_manager_search_ping_url", "");
+				break;
+			default:
 				return new WP_Error( 'broke', __( "Not a valid ping to value.", 'hbg-event-manager' ) );
 		}
 
@@ -215,8 +235,8 @@ Class HbgEventManager {
 
 				foreach ( $core_post_types as $core_post_type ) {
 					if ( isset( $wp_post_types[ $core_post_type ] ) ) {
-				       remove_menu_page( 'edit.php?post_type='. $core_post_type );
-				    }
+					   remove_menu_page( 'edit.php?post_type='. $core_post_type );
+					}
 				}
 
 			}
@@ -225,6 +245,28 @@ Class HbgEventManager {
 
 	}
 
+	public function json_api_encode_acf( $response, $post, $request ) {
+		$response->data['acf'] = get_fields($post['ID']);
+
+		return $response;
+	}
+
+	public static function slug_register_acf() {
+		register_api_field( 'event',
+			'acf',
+			array(
+				'get_callback'    => '\Helsingborg\EventManager\HbgEventManager::slug_get_acf',
+				'update_callback' => '\Helsingborg\EventManager\HbgEventManager::slug_update_acf',
+				'schema'          => null,
+			)
+		);
+	}
+	public static function slug_get_acf( $object, $field_name, $request ) {
+		return get_fields( $object['id'] );
+	}
+	public static function slug_update_acf( $value, $object, $field_name ) {
+		return update_fields( $value, $object->ID );
+	}
 	public function __destruct() {
 
 	}
