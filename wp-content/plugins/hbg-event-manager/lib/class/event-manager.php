@@ -38,9 +38,8 @@ class HbgEventManager {
 	public function __construct() {
 		//cpt
 		add_action( 'init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_event' );
-		add_action( 'init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_location' );
-		add_action( 'init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_organisation' );
-
+		//add_action( 'init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_location' );
+		//add_action( 'init', '\Helsingborg\EventManager\HbgEventManager::register_cpt_organisation' );
 		//options
 		add_action( 'init', '\Helsingborg\EventManager\HbgEventManager::register_options_page' );
 
