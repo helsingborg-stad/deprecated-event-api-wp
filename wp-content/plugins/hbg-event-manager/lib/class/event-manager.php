@@ -294,7 +294,9 @@ class HbgEventManager {
 	 * @return [type]             [description]
 	 */
 	public static function slug_update_acf( $value, $object, $field_name ) {
-		return update_fields( $value, $object->ID );
+		foreach ( $value as $acf_key => $acf_value ) {
+			update_field( $acf_key, $acf_value, $object->ID );
+		}
 	}
 
 	/**

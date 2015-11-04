@@ -14,7 +14,7 @@ module.exports = function(grunt) {
 				options: {
 					src: "./",
 					dest: "/var/www/event-api-wp/",
-					host: "root@37.18.209.106",
+					host: "root@event.helsingborg.se",
 					delete: false
 				}
 			}
